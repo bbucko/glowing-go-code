@@ -1,17 +1,22 @@
 package main
 
-import "fmt"
-import "github.com/dgryski/dkeyczar"
+import (
+	"fmt"
+	"labix.org/v2/mgo"
+	"strconv"
+	"github.com/pebbe/zmq4"
+)
 
 func main() {
 	fmt.Printf("Hello, world.\n")
 
-	plaintext := []byte("hello world")
+	session, _ := mgo.Dial("localhost")
+	c := session.DB("test").C("grades")
+	n, _ := c.Count()
 
-	reader := dkeyczar.NewFileReader("./")
-	crypter, _ := dkeyczar.NewCrypter(reader)
+	fmt.Println("Number of grades: " + strconv.Itoa(n))
 
-	ciphertext, _ := crypter.Encrypt(plaintext)
-
-	fmt.Print(ciphertext)
+	server, _ := zmq4.NewSocket(zmq4.PUSH)
+	server.ServerAuthPlain("global")
+	server.Bind("tcp://*:9000")
 }
