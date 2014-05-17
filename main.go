@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"labix.org/v2/mgo"
 	"strconv"
-	"github.com/pebbe/zmq4"
+	"github.com/streadway/amqp"
+	"github.com/nutrun/lentil"
+	"log"
 )
 
 func main() {
@@ -16,7 +18,17 @@ func main() {
 
 	fmt.Println("Number of grades: " + strconv.Itoa(n))
 
-	server, _ := zmq4.NewSocket(zmq4.PUSH)
-	server.ServerAuthPlain("global")
-	server.Bind("tcp://*:9000")
+	connection, _ := amqp.Dial("localhost")
+	defer connection.Close()
+
+	conn, e := lentil.Dial("0.0.0.0:11300")
+	if e != nil {
+		log.Fatal(e)
+	}
+	jobId, e := conn.Put(0, 0, 60, []byte("hello"))
+	if e != nil {
+		log.Fatal(e)
+	}
+	log.Printf("JOB ID: %d\n", jobId)
+
 }
