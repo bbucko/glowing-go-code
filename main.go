@@ -2,28 +2,36 @@ package main
 
 import (
 	"fmt"
-	"labix.org/v2/mgo"
-	"strconv"
-	"github.com/streadway/amqp"
 	"github.com/nutrun/lentil"
+	"github.com/streadway/amqp"
+	"labix.org/v2/mgo"
 	"log"
+	"strconv"
 )
 
 func main() {
-	fmt.Printf("Hello, world.\n")
-
-	session, _ := mgo.Dial("localhost")
+	session, e := mgo.Dial("localhost")
+	if e != nil {
+		log.Fatal(e)
+	}
 	c := session.DB("test").C("grades")
-	n, _ := c.Count()
+	n, e := c.Count()
+	if e != nil {
+		log.Fatal("mongoDB: ", e)
+	}
 
 	fmt.Println("Number of grades: " + strconv.Itoa(n))
 
-	connection, _ := amqp.Dial("localhost")
+	connection, e := amqp.Dial("amqp://localhost")
 	defer connection.Close()
-
-	conn, e := lentil.Dial("0.0.0.0:11300")
 	if e != nil {
-		log.Fatal(e)
+		log.Fatal("rabbitMQ: ", e)
+	}
+
+	conn, e := lentil.Dial("localhost:11300")
+	defer conn.Quit()
+	if e != nil {
+		log.Fatal("beanstalkd: ", e)
 	}
 	jobId, e := conn.Put(0, 0, 60, []byte("hello"))
 	if e != nil {
