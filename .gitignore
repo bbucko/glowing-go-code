@@ -21,3 +21,9 @@ _testmain.go
 
 *.exe
 *.test
+glowing-go-code
+
+#IDEA Project files
+atlassian-ide-plugin.xml
+.idea
+*.iml
