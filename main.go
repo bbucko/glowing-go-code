@@ -40,3 +40,7 @@ func main() {
 	log.Printf("JOB ID: %d\n", jobId)
 
 }
+
+func SayHello(name string) string {
+	return fmt.Sprintf("Hello, %v", name)
+}
